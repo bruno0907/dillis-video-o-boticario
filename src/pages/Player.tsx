@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { 
@@ -17,22 +17,53 @@ import {
 import { FiArrowLeft, FiRotateCcw } from "react-icons/fi"
 
 import { useVideos } from "../hooks/useVideos"
-import { VideoPlayer } from "../components/VideoPlayer"
 import { Logo } from "../components/Logo"
 
 export const Player = () => {
   const navigate = useNavigate()
-  const { data, isLoading, isError } = useVideos()
+  const { data, isLoading, isError, refetch } = useVideos()  
+  
+  const [playList, setPlayList] = useState<(string | undefined)[]>([])
+  const [currentVideoPlaying, setCurrentVideoPlaying] = useState(0)  
 
   const playerRef = useRef<HTMLVideoElement>(null)
   
-  const fullScreen = () => {
-    if(playerRef.current?.requestFullscreen) {
-      playerRef.current.requestFullscreen()    
-    } 
-  }  
+  const fullScreen = async () => {
+    if(!document.fullscreenElement && document.fullscreenEnabled) {
+      await playerRef.current?.requestFullscreen()
+    }
+  }
+  
+  const playNext = async () => {
+    await refetch()        
 
-  if(isLoading) {
+    if(currentVideoPlaying < playList.length - 1) {      
+      setCurrentVideoPlaying(currentVideoPlaying + 1)
+      return
+    } 
+    setCurrentVideoPlaying(0)
+    playerRef.current?.play()
+    return
+  }
+  
+  useEffect(() => {    
+    if(data) {
+      console.log('Caiu no useEffect do data')
+      setPlayList([...data!])
+      setCurrentVideoPlaying(0)
+      playerRef.current?.load()
+    }
+
+  }, [data])
+
+  useEffect(() => {
+    playerRef.current?.requestFullscreen()
+      .then(() => playerRef.current?.requestFullscreen())
+      .catch(() => {})
+
+  }, [])
+
+  if(isLoading || !playList.length) {
     return (      
       <Center h="100vh">
         <Spinner size="lg" mr="4" />
@@ -60,9 +91,7 @@ export const Player = () => {
         </ButtonGroup>
       </VStack>
     )
-  }
-
-  if(!data) return null
+  }  
 
   return (
     <>      
@@ -80,11 +109,15 @@ export const Player = () => {
           <Button colorScheme="whatsapp" onClick={fullScreen}>Tela cheia</Button>
         </HStack>
         
-        <VideoPlayer
-          src={data[0]!}
-          isFullScreen={fullScreen}
-          ref={playerRef}
-        />   
+        <video
+          src={playList[currentVideoPlaying]}
+          muted
+          autoPlay      
+          ref={playerRef}                          
+          controls={true}      
+          onEnded={playNext}
+        />
+
       </Flex>
     </>    
   )

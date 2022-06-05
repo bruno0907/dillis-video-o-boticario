@@ -48,7 +48,7 @@ export const startMirage = () => {
     },
   
     seeds(server) {
-      server.createList('customer', 30)
+      server.createList('customer', 4)
     },
   
     routes() {
@@ -114,6 +114,7 @@ export const startMirage = () => {
           name, 
           email, 
           phone,
+          video_url: 'https://res.cloudinary.com/bruno0907storage/video/upload/v1653333344/dillys/video.mp4',
           createdAt: faker.date.recent(10),
           updatedAt: faker.date.recent(10)
         })
