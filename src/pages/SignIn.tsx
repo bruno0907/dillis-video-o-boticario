@@ -39,8 +39,7 @@ export const SignIn = () => {
     register, 
     handleSubmit, 
     formState: { errors, isSubmitting }, 
-    setError,
-    setFocus
+    setError,    
   } = useForm<SignInProps>({
     resolver: yupResolver(signInSchema)
   })
@@ -52,23 +51,24 @@ export const SignIn = () => {
         status: 'success',
         title: 'Login efetuado com sucesso!',
         description: 'Redirecionando, aguarde...',
-        duration: 1000,
-        position: 'top-right',
+        duration: 5000,     
+        position: 'bottom',
+        isClosable: true
       })
       navigate('/customers')
 
-    } catch (error) {
+    } catch (error: any) {
       toast({
         status: 'error',
-        title: 'Um erro ocorreu...',
-        description: 'Não foi possível fazer sua autenticação',
-        duration: 3000,
-        position: 'top-right'
+        title: 'Um erro ocorreu...'        ,
+        description: 'Não foi possível fazer sua autenticação.',
+        duration: 10000,
+        position: 'bottom',
+        isClosable: true
       })
       setError('username', {
         message: 'Usuário ou senha inválidos'
-      })
-      setFocus('username')
+      })      
     }
   }
 
@@ -133,4 +133,3 @@ export const SignIn = () => {
     </Flex>    
   )
 }
-

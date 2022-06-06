@@ -23,10 +23,11 @@ import { masked } from "../utils/masked";
 import { CustomerProps, NewCustomerProps } from "../types";
 import { useCreateCustomer } from "../hooks/useCreateCustomer";
 import { useUpdateCustomer } from "../hooks/useUpdateCustomer";
+import { queryClient } from "../services/queryClient";
 
 const customerSchema = yup.object().shape({
   name: yup.string().required('O nome é obrigatório')
-    .min(5, 'O nome deve conter no mínimo 5 caracteres')
+    .min(2, 'O nome deve conter no mínimo 2 caracteres')
     .max(120, 'O nome não deve ultrapassar 120 caracteres')
     .trim(),
   email: yup.string().email('Você deve informar um formato de e-mail válido').required('O e-mail é obrigatório'),  
@@ -49,12 +50,28 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
     register, 
     reset, 
     handleSubmit,
+    setError,    
     formState: { errors, isSubmitting } 
   } = useForm<NewCustomerProps>({
     resolver: yupResolver(customerSchema)
   })  
   
-  const sanitizePhone = (str: string) => str.replace(/[^0-9]/g, '')
+  const sanitizePhone = (str: string) => str.replace(/[^0-9]/g, '') 
+  
+  const handleCancelFormSubmit = async () => {
+    reset({}, { keepValues: true })    
+    await queryClient.cancelMutations()
+    .then(() => {
+      toast({
+        status: 'warning',        
+        title: 'Atenção!',
+        description: 'Ação interrompida pelo usuário.',        
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom'
+      })
+    })     
+  }
 
   const handleSubmitUser: SubmitHandler<NewCustomerProps> = async values => {
     const { email, name, phone } = values
@@ -69,11 +86,12 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         })    
         handleCustomerToEdit(null)
         toast({
-          status: 'success',          
+          status: 'success',                    
           title: 'Sucesso!',
-          description: 'Usuário atualizado com sucesso',
-          position: 'top-right',
-          duration: 3000
+          description: 'Cadastro atualizado com sucesso.',          
+          duration: 5000,
+          isClosable: true,
+          position: 'bottom'
         })
         handleClose()
         return
@@ -85,27 +103,61 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         phone: sanitizePhone(phone)
       })
       toast({
-        status: 'success',
+        status: 'success',  
         title: 'Sucesso!',
-        description: 'Usuário cadastrado com sucesso',
-        position: 'top-right',
-        duration: 3000
+        description: 'Visitante cadastrado com sucesso.',        
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom'
       })
       handleClose()
       return
       
-    } catch (error) {      
-      toast({
-        status: 'error',
-        title: 'Erro!',
-        description: 'Ocorreu um erro com a sua solicitação',
-        position: 'top-right',
-        duration: 5000
-      })
-      handleClose()
+    } catch (error: any) {
+      switch (error.response.status) {
+        case 400: 
+          toast({
+            status: 'warning',
+            title: 'Atenção!',
+            description: 'Não existe nenhum vídeo gravado.',            
+            duration: 10000,
+            isClosable: true,
+            position: 'bottom'
+          })
+        break
+        case 401: 
+          toast({
+            status: 'warning',
+            title: 'Atenção!',            
+            description: 'E-mail já cadastrado.',            
+            duration: 10000,
+            isClosable: true,
+            position: 'bottom'
+          })
+          setError('email', { message: 'E-mail já cadastrado'})          
+        break
+        case 500: 
+          toast({
+            status: 'error',
+            title: 'Ocorreu um erro...',            
+            description: 'Servidor indisponível. Tente novamente!',            
+            duration: 10000,
+            isClosable: true,
+            position: 'bottom'
+          })
+        break
+        default: 
+          toast({
+            status: 'error',
+            title: 'Ocorreu um erro...',            
+            description: error.response.data.message ?? 'Ocorreu um erro desconhecido',            
+            duration: 10000,
+            isClosable: true,
+            position: 'bottom'
+          })
+      }
     }
     return
-
   }
 
   const handleSubmitErrors: SubmitErrorHandler<NewCustomerProps> = (error) => {    
@@ -159,7 +211,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
             type="email"
             placeholder="contato@email.com.br"
             autoComplete="none"
-            isDisabled={isSubmitting}
+            isDisabled={isSubmitting}            
             _placeholder={{ fontStyle: 'italic' }}
             {...register('email')}
           />
@@ -184,7 +236,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
             placeholder="99 9999-9999"
             autoComplete="none"            
             isDisabled={isSubmitting}
-            _placeholder={{ fontStyle: 'italic' }}
+            _placeholder={{ fontStyle: 'italic' }}            
             {...register('phone')}
             onChange={e => e.target.value = masked(e.target.value, 'mobile')}
           />
@@ -197,20 +249,22 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         ) }
       </FormControl>
       <ButtonGroup alignSelf="flex-end">
-        <Button 
-          type="reset" 
+        <Button           
           variant="ghost" 
-          colorScheme="whatsapp"
-          isDisabled={isSubmitting} 
+          colorScheme="whatsapp"          
           leftIcon={<FiX />}
-          onClick={handleClose}
-        >Cancelar</Button>
+          borderRadius="sm"
+          onClick={isSubmitting ? handleCancelFormSubmit : handleClose}
+        >
+          {isSubmitting ? 'Cancelar' : 'Fechar'}
+        </Button>
         <Button 
           type="submit" 
           colorScheme="whatsapp"
           isLoading={isSubmitting}
           leftIcon={<FiCheck />}
           loadingText="Enviando"
+          borderRadius="sm"
         >
           {customerToEdit ? 'Salvar' : 'Cadastrar'}
         </Button>

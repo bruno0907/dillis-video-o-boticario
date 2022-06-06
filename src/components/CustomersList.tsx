@@ -1,5 +1,5 @@
-import { Tbody, Tr, Td, Button, useToast } from "@chakra-ui/react"
-import { FiEdit, FiSend } from "react-icons/fi"
+import { Tbody, Tr, Td, Button, useToast, Text, HStack } from "@chakra-ui/react"
+import { FiAlertTriangle, FiEdit, FiSend } from "react-icons/fi"
 import { DeleteCustomerBtn } from "./DeleteCustomerBtn"
 import { CustomerProps } from '../types'
 import { sendMail } from "../services/email/sendMail"
@@ -23,25 +23,34 @@ export const CustomersList = ({ customers, handleCustomerToEdit, handleOpenModal
       await sendMail(id)
       toast({
         status: 'success',
-        title: 'E-mail enviado!',
+        title: 'Sucesso!',        
         description: 'O e-mail foi enviado com sucesso.',
-        duration: 3000,
-        position: 'top-right'
+        duration: 5000,        
+        isClosable: true,
+        position: 'bottom'
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         status: 'error',
-        title: 'Um erro ocorreu...',
+        title: 'Ocorreu um erro...',        
         description: 'Não foi possível enviar o e-mail',
-        duration: 5000,
-        position: 'top-right'
-      })
+        duration: 10000,        
+        isClosable: true,
+        position: 'bottom'
+      })      
     }
   }
   
   return (
     <Tbody>
-      {customers!.map(customer => (
+      {!customers?.length ? (
+        <Tr>
+          <HStack spacing={3} p="3">
+            <FiAlertTriangle />
+            <Text color="gray.400" display="flex">Nenhum visitante encontrado</Text>
+          </HStack>
+        </Tr>
+      ) : customers!.map(customer => (
         <Tr key={customer.id}>
           <Td>{customer.name}</Td>
           <Td>{customer.email}</Td>

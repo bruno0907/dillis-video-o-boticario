@@ -11,6 +11,7 @@ import {
   useDisclosure,
   useToast,   
 } from "@chakra-ui/react"
+import { truncate } from "fs";
 
 import { FiX } from "react-icons/fi"
 
@@ -31,18 +32,20 @@ export const DeleteCustomerBtn = ({ userId }: DeleteCustomerBtnProps) => {
       await mutateAsync(userId)
       toast({
         status: 'success',
-        title: 'Sucesso!',
-        description: 'Usuário excluído com sucesso',
-        duration: 1500,
-        position: 'top-right'
+        title: 'Sucesso!',        
+        description: 'Cadastro excluído com sucesso.',
+        duration: 5000,
+        position: 'bottom',
+        isClosable: true     
       })
     } catch (error) {
       toast({
         status: 'error',
-        title: 'Um erro ocorreu...',
-        description: 'Não foi possível excluir o usuário',
-        duration: 3000,
-        position: 'top-right',
+        title: 'Ocorreu um erro...',        
+        description: 'Não foi possível excluir o cadastro.',
+        duration: 10000,
+        position: 'bottom', 
+        isClosable: true       
       })
     }
   }

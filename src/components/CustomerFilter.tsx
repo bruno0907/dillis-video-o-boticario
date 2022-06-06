@@ -47,11 +47,11 @@ export const CustomerFilter = ({
     <ButtonGroup spacing={4} alignSelf="flex-end">
       <Popover placement="left-end">
         <PopoverTrigger>
-          <Button colorScheme="whatsapp" leftIcon={<FiFilter />} variant="link">Procurar cliente</Button>
+          <Button colorScheme="whatsapp" leftIcon={<FiFilter />} variant="link">Procurar visitante</Button>
         </PopoverTrigger>
-        <PopoverContent bg="gray.800" p="2">
+        <PopoverContent bg="gray.800" p="2" borderRadius="sm">
           <PopoverArrow bg="gray.800" />
-          <PopoverHeader fontWeight="medium">Pesquisar</PopoverHeader>
+          <PopoverHeader fontWeight="medium">Procurar visitante</PopoverHeader>
           <PopoverCloseButton top="2" />
           <PopoverBody display="flex" flexDir="column">
             <VStack spacing={4} alignItems="center" justifyContent="space-between" py="4">
@@ -60,6 +60,7 @@ export const CustomerFilter = ({
                 defaultValue="defaultValue"
                 isDisabled={isSearching}
                 size="lg"
+                borderRadius="sm"
                 onChange={e => handleSearchBy(e.target.value)}
               >
                 <option value="defaultValue" style={{ color: '#0b0c11' }} hidden>Procurar por...</option>
@@ -67,14 +68,15 @@ export const CustomerFilter = ({
                 <option value="email" style={{ color: '#0b0c11' }}>Procurar por e-mail</option>
               </Select>              
               <InputGroup>
-                <InputLeftElement>
+                <InputLeftElement mt="1">
                   <FiSearch />
                 </InputLeftElement>
                 <Input
                   name="searchValue"
-                  value={searchValue}
+                  value={searchValue}                  
                   isDisabled={!searchBy || isSearching}
-                  size="lg"
+                  size="lg"        
+                  borderRadius="sm"          
                   onChange={handleSearch}
                 />
               </InputGroup>              

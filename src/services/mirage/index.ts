@@ -48,7 +48,7 @@ export const startMirage = () => {
     },
   
     seeds(server) {
-      server.createList('customer', 4)
+      server.createList('customer', 5)
     },
   
     routes() {
@@ -118,8 +118,9 @@ export const startMirage = () => {
           createdAt: faker.date.recent(10),
           updatedAt: faker.date.recent(10)
         })
-        
-        return new Response(200)
+
+        return new Response(201)
+
       })
 
       this.put('/customers/:id', (schema, request) => {
@@ -142,7 +143,7 @@ export const startMirage = () => {
           updatedAt: faker.date.recent(10)
         })
 
-        return new Response(204)
+        return new Response(200)
       })
 
       this.del('/customers/:id', (schema, request) => {

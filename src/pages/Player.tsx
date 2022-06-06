@@ -35,33 +35,26 @@ export const Player = () => {
   }
   
   const playNext = async () => {
-    await refetch()        
-
-    if(currentVideoPlaying < playList.length - 1) {      
-      setCurrentVideoPlaying(currentVideoPlaying + 1)
-      return
-    } 
-    setCurrentVideoPlaying(0)
-    playerRef.current?.play()
-    return
+    await refetch()
+      .then(() => {
+        if(currentVideoPlaying < playList.length - 1) {      
+          setCurrentVideoPlaying(currentVideoPlaying + 1)
+          return
+        } 
+        setCurrentVideoPlaying(0)
+        playerRef.current?.play()
+        return
+      })
   }
-  
+
   useEffect(() => {    
-    if(data) {
-      console.log('Caiu no useEffect do data')
+    if(data) {      
       setPlayList([...data!])
       setCurrentVideoPlaying(0)
       playerRef.current?.load()
     }
 
   }, [data])
-
-  useEffect(() => {
-    playerRef.current?.requestFullscreen()
-      .then(() => playerRef.current?.requestFullscreen())
-      .catch(() => {})
-
-  }, [])
 
   if(isLoading || !playList.length) {
     return (      
@@ -101,12 +94,17 @@ export const Player = () => {
             aria-label="voltar" 
             variant="ghost" 
             onClick={() => navigate('/')}
+            borderRadius="sm"
             _hover={{ bg: 'green.500' }}
           >
             <FiArrowLeft fontSize="24"/>
           </IconButton>          
           <Logo />
-          <Button colorScheme="whatsapp" onClick={fullScreen}>Tela cheia</Button>
+          <Button 
+            colorScheme="whatsapp" 
+            onClick={fullScreen}
+            borderRadius="sm"
+          >Tela cheia</Button>
         </HStack>
         
         <video
@@ -114,7 +112,8 @@ export const Player = () => {
           muted
           autoPlay      
           ref={playerRef}                          
-          controls={true}      
+          controls={true}
+          onPlay={fullScreen}
           onEnded={playNext}
         />
 

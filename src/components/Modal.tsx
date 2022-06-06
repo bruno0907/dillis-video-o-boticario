@@ -17,9 +17,9 @@ type ModalProps = ChakraModalProps & {
 
 export const Modal = ({ isOpen, onClose, label, children, ...modal}: ModalProps) => {
   return (
-    <ChakraModal isOpen={isOpen} onClose={onClose} isCentered { ...modal }>
+    <ChakraModal isOpen={isOpen} onClose={onClose} isCentered closeOnOverlayClick={false} { ...modal }>
       <ModalOverlay />
-      <ModalContent bgColor="gray.800" borderRadius="lg" boxShadow="sm">
+      <ModalContent bgColor="gray.800" borderRadius="md" boxShadow="sm">
         <ModalHeader>{label}</ModalHeader>
         <ModalCloseButton />
         <ModalBody px="8" pb="8">
