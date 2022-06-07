@@ -1,0 +1,1 @@
+export const sanitizePhone = (str: string) => str.replace(/[^0-9]/g, '')

@@ -4,8 +4,8 @@ import { createCustomer } from "../services/users/createCustomer";
 import { NewCustomerProps } from "../types";
 
 export const useCreateCustomer = () => useMutation(
-  async ({ name, email, phone }: NewCustomerProps) => {
-    await createCustomer({ name, email, phone })
+  async ({ name, email, authorizeSendMail, authorizeDisplayVideo }: NewCustomerProps) => {
+    await createCustomer({ name, email, authorizeSendMail, authorizeDisplayVideo })
   }, {   
     onSuccess: () => queryClient.invalidateQueries(['customers[]'])
   }

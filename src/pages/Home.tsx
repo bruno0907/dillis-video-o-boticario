@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import { Button, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Button, ButtonGroup, Heading, VStack } from "@chakra-ui/react"
 
 import { Logo } from '../components/Logo'
 import { FiUsers } from "react-icons/fi";
@@ -13,7 +13,7 @@ export const Home = () => {
       <Logo mt="48" mb="16"/>
       <VStack w="md" spacing={16} p="8"  bgColor="#000a1f96" borderRadius="md" boxShadow="sm">
         <Heading size="lg">Bem-vindo</Heading>
-        <HStack spacing={4}>
+        <ButtonGroup>
           <Button
             colorScheme="green"
             onClick={() => navigate('/customers')}
@@ -26,7 +26,7 @@ export const Home = () => {
             leftIcon={<BiCameraMovie fontSize={19} />}
             borderRadius="sm"
           >Video</Button>
-        </HStack>
+        </ButtonGroup>
       </VStack>
     </>
   )

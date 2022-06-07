@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import { 
   Button, 
   ButtonGroup, 
+  Checkbox, 
   FormControl, 
   FormErrorIcon, 
   FormErrorMessage, 
@@ -15,11 +16,10 @@ import {
   VStack 
 } from "@chakra-ui/react";
 
-import { FiUser, FiMail, FiPhone, FiCheck, FiX } from "react-icons/fi";
+import { FiUser, FiMail, FiCheck, FiX } from "react-icons/fi";
 
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { masked } from "../utils/masked";
 import { CustomerProps, NewCustomerProps } from "../types";
 import { useCreateCustomer } from "../hooks/useCreateCustomer";
 import { useUpdateCustomer } from "../hooks/useUpdateCustomer";
@@ -31,8 +31,14 @@ const customerSchema = yup.object().shape({
     .min(2, 'O nome deve conter no mínimo 2 caracteres')
     .max(120, 'O nome não deve ultrapassar 120 caracteres')
     .trim(),
-  email: yup.string().email('Você deve informar um formato de e-mail válido').required('O e-mail é obrigatório'),  
-  phone: yup.string().trim(),
+  authorizeSendMail: yup.boolean(),
+    email: yup.string().email('Você deve informar um formato de e-mail válido').when(
+    'authorizeSendMail', {
+      is: (authorizeSendMail: boolean) => authorizeSendMail === true,
+      then: yup.string().required('O e-mail é obrigatório')        
+    }
+  ),  
+  authorizeDisplayVideo: yup.boolean()
 })
 
 type CustomerFormProps = {
@@ -46,45 +52,36 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
 
   const createCustomer = useCreateCustomer()
   const updateCustomer = useUpdateCustomer()
-  const retryCreateCustomer = useRetryCreateCustomer()
+  const retryCreateCustomer = useRetryCreateCustomer()  
 
   const { 
     register, 
     reset, 
     handleSubmit,
     setError,    
+    watch,
+    setFocus,
+    setValue,
+    clearErrors,
     formState: { errors, isSubmitting } 
   } = useForm<NewCustomerProps>({
     resolver: yupResolver(customerSchema)
-  })  
-  
-  const sanitizePhone = (str: string) => str.replace(/[^0-9]/g, '') 
-  
-  const handleCancelFormSubmit = async () => {
-    reset({}, { keepValues: true })    
-    await queryClient.cancelMutations()
-    .then(() => {
-      toast({
-        status: 'warning',        
-        title: 'Atenção!',
-        description: 'Ação interrompida pelo usuário.',        
-        duration: 5000,
-        isClosable: true,
-        position: 'bottom'
-      })
-    })     
-  }
+  })
+
+  const isAuthorizingSendMail = watch('authorizeSendMail', false)    
+  const isAuthorizingSendVideo = watch('authorizeDisplayVideo', false)
 
   const handleSubmitUser: SubmitHandler<NewCustomerProps> = async values => {
-    const { email, name, phone } = values
+    const { email, name, authorizeSendMail, authorizeDisplayVideo } = values
 
     try {
       if(customerToEdit) {
         await updateCustomer.mutateAsync({
           ...customerToEdit,
           name,
-          email,
-          phone: sanitizePhone(phone)
+          email: authorizeSendMail ? email: '',
+          authorizeSendMail,
+          authorizeDisplayVideo
         })    
         handleCustomerToEdit(null)
         toast({
@@ -102,7 +99,8 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
       await createCustomer.mutateAsync({
         name,
         email,
-        phone: sanitizePhone(phone)
+        authorizeSendMail,
+        authorizeDisplayVideo
       })
 
       toast({
@@ -143,7 +141,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         break
 
         case 500: 
-          await retryCreateCustomer.mutateAsync({ name, email, phone })
+          await retryCreateCustomer.mutateAsync({ name, email, authorizeSendMail, authorizeDisplayVideo })
           .catch(() => {
             toast({
               status: 'error',
@@ -175,19 +173,52 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
     console.log('Event handler de erro', error)
   }
 
+  const handleCancelFormSubmit = async () => {
+    reset({}, { keepValues: true })    
+    await queryClient.cancelMutations()
+    .then(() => {
+      toast({
+        status: 'warning',        
+        title: 'Atenção!',
+        description: 'Ação interrompida pelo usuário.',        
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom'
+      })
+    })     
+  }  
+  
+  useEffect(() => {
+    if(!isAuthorizingSendMail) {       
+      setValue('email', customerToEdit?.email ?? '') 
+      clearErrors('email')
+      return
+    }
+
+  }, [isAuthorizingSendMail, setValue, clearErrors, customerToEdit])
+
   useEffect(() => {
     if(customerToEdit) {
       reset({
         name: customerToEdit.name,
         email: customerToEdit.email,
-        phone: customerToEdit.phone
-      })
+        authorizeSendMail: customerToEdit.authorizeSendMail,
+        authorizeDisplayVideo: customerToEdit.authorizeDisplayVideo,
+      })      
     }
     
-  }, [customerToEdit, reset])    
+  }, [customerToEdit, reset])
+
+  useEffect(() => {
+    if(isAuthorizingSendMail) {
+      setFocus('email', { shouldSelect: true })
+      return
+    }    
+
+  }, [isAuthorizingSendMail, setFocus])
 
   return (
-    <VStack as="form" spacing={4} onSubmit={handleSubmit(handleSubmitUser, handleSubmitErrors)}>
+    <VStack as="form" spacing={8} align="flex-start" onSubmit={handleSubmit(handleSubmitUser, handleSubmitErrors)}>
       <FormControl isInvalid={!!errors.name}>
         <FormLabel htmlFor="name">Nome completo</FormLabel>
         <InputGroup size="lg">
@@ -211,54 +242,45 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
           </FormErrorMessage>
         }
       </FormControl>
-      <FormControl isInvalid={!!errors.email}>
-      <FormLabel htmlFor="email">E-mail</FormLabel>
-        <InputGroup size="lg">
-          <InputLeftElement>
-            <FiMail fontSize="20"/>
-          </InputLeftElement>
-          <Input
-            id="email"
-            type="email"
-            placeholder="contato@email.com.br"
-            autoComplete="none"
-            isDisabled={isSubmitting}            
-            _placeholder={{ fontStyle: 'italic' }}
-            {...register('email')}
-          />
-        </InputGroup>
-        { errors.email && (
-          <FormErrorMessage>
-            <FormErrorIcon />
-            { errors.email.message }
-          </FormErrorMessage>
 
-        )}
-      </FormControl>
-      <FormControl isInvalid={!!errors.phone}>
-      <FormLabel htmlFor="phone">Whatsappp</FormLabel>
-        <InputGroup mb="4" size="lg">
-          <InputLeftElement>
-            <FiPhone fontSize="20"/>
-          </InputLeftElement>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="99 9999-9999"
-            autoComplete="none"            
-            isDisabled={isSubmitting}
-            _placeholder={{ fontStyle: 'italic' }}            
-            {...register('phone')}
-            onChange={e => e.target.value = masked(e.target.value, 'mobile')}
-          />
-        </InputGroup>
-        { !!errors.phone && (
-          <FormErrorMessage>
-            <FormErrorIcon />
-            { errors.phone.message }
-          </FormErrorMessage>
-        ) }
-      </FormControl>
+      <VStack spacing={2}>
+        <Checkbox colorScheme="whatsapp" {...register('authorizeSendMail')}>
+          {isAuthorizingSendMail 
+            ? 'Estou autorizando me enviar o vídeo no e-mail' 
+            : 'Autorizo me enviar o vídeo por e-mail'
+          }          
+        </Checkbox>
+        <FormControl isInvalid={!!errors.email}>
+          <InputGroup size="lg" display={isAuthorizingSendMail ? 'block' : 'none'}>
+            <InputLeftElement>
+              <FiMail fontSize="20"/>
+            </InputLeftElement>
+            <Input
+              id="email"
+              // type="email"
+              placeholder="contato@email.com.br"
+              autoComplete="none"
+              isDisabled={isSubmitting}
+              _placeholder={{ fontStyle: 'italic' }}
+              {...register('email')}
+              />
+          </InputGroup>
+          { errors.email && (
+            <FormErrorMessage>
+              <FormErrorIcon />
+              { errors.email.message }
+            </FormErrorMessage>
+          )}
+        </FormControl>
+      </VStack>
+
+      <Checkbox colorScheme="whatsapp" {...register('authorizeDisplayVideo')}>
+        {isAuthorizingSendVideo
+          ? 'Estou autorizando a exibição do meu vídeo'          
+          : 'Autorizo exibir o meu vídeo no evento'
+        }
+      </Checkbox>
+            
       <ButtonGroup alignSelf="flex-end">
         <Button           
           variant="ghost" 

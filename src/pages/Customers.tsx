@@ -3,11 +3,7 @@ import { useNavigate } from "react-router-dom"
 
 import {
   VStack,
-  Heading,  
-  Table,
-  Tr,
-  Thead,
-  Th,  
+  Heading,     
   Button,
   HStack,
   Text,
@@ -18,11 +14,8 @@ import {
   ButtonGroup,
 } from "@chakra-ui/react"
 
-import {
-  FiMail,
-  FiUser,  
-  FiArrowLeft,
-  FiPhone,
+import {  
+  FiArrowLeft,  
   FiRotateCcw,
   FiPlus,    
 } from "react-icons/fi"
@@ -127,45 +120,21 @@ export const Customers = () => {
             handleSearchValue={setSearchValue}
             handleRefetching={refetch}
           />
-          <Table>
-            <Thead>
-              <Tr>
-                <Th w="40%">
-                  <HStack align="center">
-                    <FiUser fontSize="20" />
-                    <Text>Nome completo</Text>
-                    {isFetching && <Spinner size="xs" ml="2" />}
-                  </HStack>
-                </Th>
-                <Th w="40%">
-                  <HStack>
-                    <FiMail fontSize="20" />
-                    <Text>E-mail</Text>
-                  </HStack>
-                </Th>
-                <Th w="30%">
-                  <HStack>
-                    <FiPhone fontSize="20" />
-                    <Text>Telefone</Text>
-                  </HStack>
-                </Th>
-                <Th textAlign="center">Editar</Th>
-                <Th textAlign="center">Enviar E-mail</Th>
-                <Th textAlign="center">Excluir</Th>
-              </Tr>
-            </Thead>
-            <CustomersList 
-              customers={data?.customers}
-              handleCustomerToEdit={setCustomer}
-              handleOpenModal={onOpen}
-            />
+          
+          <CustomersList 
+            customers={data?.customers}
+            handleCustomerToEdit={setCustomer}
+            handleOpenModal={onOpen}
+            isFetching={isFetching}
+          >
             <Pagination
               page={page}                  
               setPage={setPage}
               perPage={perPage}
               totalCount={data!.totalCount}
             />
-          </Table>
+          </CustomersList>
+          
         </TableContainer>        
       </>      
       <Modal label={!customer ? 'Novo visitante' : 'Editar visitante'} isOpen={isOpen} onClose={handleClose}>

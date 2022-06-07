@@ -18,10 +18,11 @@ import { FiArrowLeft, FiRotateCcw } from "react-icons/fi"
 
 import { useVideos } from "../hooks/useVideos"
 import { Logo } from "../components/Logo"
+import { BiFullscreen } from "react-icons/bi"
 
 export const Player = () => {
   const navigate = useNavigate()
-  const { data, isLoading, isError, refetch } = useVideos()  
+  const { data, isLoading, isError, refetch } = useVideos()
   
   const [playList, setPlayList] = useState<(string | undefined)[]>([])
   const [currentVideoPlaying, setCurrentVideoPlaying] = useState(0)  
@@ -42,7 +43,7 @@ export const Player = () => {
           return
         } 
         setCurrentVideoPlaying(0)
-        playerRef.current?.play()
+        playerRef.current?.play().catch(() => {})
         return
       })
   }
@@ -94,7 +95,7 @@ export const Player = () => {
             aria-label="voltar" 
             variant="ghost" 
             onClick={() => navigate('/')}
-            borderRadius="sm"
+            borderRadius="sm"            
             _hover={{ bg: 'green.500' }}
           >
             <FiArrowLeft fontSize="24"/>
@@ -104,6 +105,7 @@ export const Player = () => {
             colorScheme="whatsapp" 
             onClick={fullScreen}
             borderRadius="sm"
+            leftIcon={<BiFullscreen />}
           >Tela cheia</Button>
         </HStack>
         

@@ -6,12 +6,14 @@ export const useCustomers = (
   perPage?: number | null, 
   searchBy?: string, 
   searchValue?: string
-) => useQuery(['customers[]', { page, perPage, searchBy, searchValue }], async () => getCustomers(
-  page, 
-  perPage, 
-  searchBy, 
-  searchValue
-), {
-  staleTime: 1000 * 60 * 10, // 10 minutes
-  keepPreviousData: true
-})
+) => useQuery(['customers[]', { page, perPage, searchBy, searchValue }], 
+  async () => await getCustomers(
+    page, 
+    perPage, 
+    searchBy, 
+    searchValue
+  ), {
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    keepPreviousData: true
+  }
+)

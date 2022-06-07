@@ -1,19 +1,20 @@
-import { 
-  Popover,  
-  PopoverTrigger,
-  Button,
-  PopoverContent,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverHeader,
-  PopoverBody,
+import { useRef } from "react";
+
+import {
+  Button,  
   ButtonGroup,
   useDisclosure,
-  useToast,   
+  useToast,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,   
 } from "@chakra-ui/react"
-import { truncate } from "fs";
 
-import { FiX } from "react-icons/fi"
+import { FiCheck, FiX } from "react-icons/fi"
 
 import { useDeleteCustomer } from "../hooks/useDeleteCustomer"
 
@@ -22,8 +23,10 @@ type DeleteCustomerBtnProps = {
 }
 
 export const DeleteCustomerBtn = ({ userId }: DeleteCustomerBtnProps) => {
-  const popOver = useDisclosure()
+  const alert = useDisclosure()
   const toast = useToast()
+
+  const cancelRef = useRef<HTMLButtonElement>(null)
 
   const { isLoading, mutateAsync } = useDeleteCustomer()
 
@@ -50,50 +53,58 @@ export const DeleteCustomerBtn = ({ userId }: DeleteCustomerBtnProps) => {
     }
   }
 
-  return (
-    <Popover
-      placement="bottom-end"
-      isOpen={popOver.isOpen}
-      onOpen={popOver.onOpen}
-      onClose={popOver.onClose}
-      closeOnBlur={false}
-    >
-      <PopoverTrigger>
-        <Button
-          variant="link"          
-          isDisabled={isLoading}
-          _hover={{ color: 'green.500' }}
-        >
-          <FiX fontSize="20" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent bg="gray.800" p="2">
-        <PopoverArrow bg="gray.800"/>
-        <PopoverCloseButton isDisabled={isLoading} top="2"/>
-        <PopoverHeader fontWeight="medium" textAlign="left">Confirmação!</PopoverHeader>
-        <PopoverBody textAlign="start">
-          Você tem certeza que deseja 
-          <br/>
-          excluir esse registro?          
-        </PopoverBody>
-        <ButtonGroup spacing="2" display="flex" justifyContent="flex-end" p="4">
-          <Button 
-            colorScheme="whatsapp"
-            isDisabled={isLoading}             
-            onClick={popOver.onClose}
-          >
-            Não
-          </Button>
-          <Button 
-            colorScheme="whatsapp" 
-            variant="ghost"
-            isLoading={isLoading}             
-            onClick={() => handleDeleteUser(userId)}
-            >
-              Sim
-            </Button>
-        </ButtonGroup>
-      </PopoverContent>
-    </Popover>
+  return (    
+    <>
+      <Button
+        variant="ghost"   
+        colorScheme="whatsapp"       
+        isDisabled={isLoading}
+        borderRadius="sm"
+        leftIcon={<FiX/>}
+        onClick={alert.onOpen}          
+      >          
+        Excluir
+      </Button>
+      <AlertDialog
+        motionPreset='slideInBottom'
+        leastDestructiveRef={cancelRef}
+        onClose={alert.onClose}
+        isOpen={alert.isOpen}
+        isCentered
+      >
+        <AlertDialogOverlay />
+
+        <AlertDialogContent bgColor="gray.800">
+          <AlertDialogHeader>Excluir visitante?</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            Você tem certeza de que deseja excluir o cadastro deste visitante.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <ButtonGroup>
+              <Button 
+                ref={cancelRef} 
+                onClick={alert.onClose} 
+                colorScheme="whatsapp"
+                leftIcon={<FiX />}
+                borderRadius="sm"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                colorScheme='whatsapp' 
+                variant="ghost" 
+                onClick={() => handleDeleteUser(userId)} 
+                isLoading={isLoading}
+                leftIcon={<FiCheck />}
+                borderRadius="sm"
+              >
+                Excluir cadastro
+              </Button>
+            </ButtonGroup>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

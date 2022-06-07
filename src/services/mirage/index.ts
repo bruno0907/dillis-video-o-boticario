@@ -27,8 +27,13 @@ export const startMirage = () => {
         email() {
           return faker.internet.email().toLocaleLowerCase()
         },
-        phone() {
-          return faker.phone.phoneNumber('###########')
+        authorizeSendMail(i) {
+          const isAuthorizing = [true, false]
+          return isAuthorizing[i % isAuthorizing.length]          
+        },
+        authorizeDisplayVideo(i) {
+          const isAuthorizing = [true, false]
+          return isAuthorizing[i % isAuthorizing.length]          
         },
         video_url(i) {          
           const urls = [
@@ -61,7 +66,7 @@ export const startMirage = () => {
           const total = schema.all('customer').length
           const customers: CustomerProps[] = this.serialize(schema.all('customer')).customers
 
-          if(!searchBy) {
+          if(!searchBy) {            
             return new Response(
               200,
               { 'x-total-count' : String(total) },
@@ -84,7 +89,7 @@ export const startMirage = () => {
           const pageStart = (Number(page) - 1) * Number(perPage)
           const pageEnd = pageStart + Number(perPage)
           
-          const customers: CustomerProps[] = this.serialize(schema.all('customer')).customers.slice(pageStart, pageEnd)
+          const customers: CustomerProps[] = this.serialize(schema.all('customer')).customers.slice(pageStart, pageEnd)          
     
           return new Response(
             200,
@@ -108,12 +113,13 @@ export const startMirage = () => {
       })
 
       this.post('/customers', (schema, request) => {
-        const { name, email, phone }: NewCustomerProps = JSON.parse(request.requestBody)
+        const { name, email, authorizeSendMail, authorizeDisplayVideo }: NewCustomerProps = JSON.parse(request.requestBody)
         
         schema.create('customer', { 
           name, 
           email, 
-          phone,
+          authorizeSendMail,
+          authorizeDisplayVideo,
           video_url: 'https://res.cloudinary.com/bruno0907storage/video/upload/v1653333344/dillys/video.mp4',
           createdAt: faker.date.recent(10),
           updatedAt: faker.date.recent(10)
@@ -126,11 +132,11 @@ export const startMirage = () => {
       this.put('/customers/:id', (schema, request) => {
         const { id } = request.params!
         
-        const { name, email, phone }: CustomerProps = JSON.parse(request.requestBody)
+        const { name, email, authorizeSendMail, authorizeDisplayVideo }: CustomerProps = JSON.parse(request.requestBody)
         
         const customer = schema.findBy('customer', { id })
         
-        if(!customer) return new Response(500, {}, {
+        if(!customer) return new Response(400, {}, {
           error: {
             message: 'Customer not found'
           }
@@ -139,7 +145,8 @@ export const startMirage = () => {
         customer.update({
           name,
           email,
-          phone,
+          authorizeSendMail,
+          authorizeDisplayVideo,
           updatedAt: faker.date.recent(10)
         })
 
