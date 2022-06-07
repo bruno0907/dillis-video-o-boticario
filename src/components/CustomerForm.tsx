@@ -24,6 +24,7 @@ import { CustomerProps, NewCustomerProps } from "../types";
 import { useCreateCustomer } from "../hooks/useCreateCustomer";
 import { useUpdateCustomer } from "../hooks/useUpdateCustomer";
 import { queryClient } from "../services/queryClient";
+import { useRetryCreateCustomer } from "../hooks/useRetryCreateCustomer";
 
 const customerSchema = yup.object().shape({
   name: yup.string().required('O nome é obrigatório')
@@ -37,7 +38,7 @@ const customerSchema = yup.object().shape({
 type CustomerFormProps = {
   customerToEdit?: CustomerProps | null;  
   handleCustomerToEdit: (customer: CustomerProps | null) => void;
-  handleClose: () => void;
+  handleClose: () => void;  
 }
 
 export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose }: CustomerFormProps) => {
@@ -45,6 +46,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
 
   const createCustomer = useCreateCustomer()
   const updateCustomer = useUpdateCustomer()
+  const retryCreateCustomer = useRetryCreateCustomer()
 
   const { 
     register, 
@@ -102,6 +104,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         email,
         phone: sanitizePhone(phone)
       })
+
       toast({
         status: 'success',  
         title: 'Sucesso!',
@@ -114,6 +117,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
       return
       
     } catch (error: any) {
+
       switch (error.response.status) {
         case 400: 
           toast({
@@ -125,6 +129,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
             position: 'bottom'
           })
         break
+
         case 401: 
           toast({
             status: 'warning',
@@ -136,16 +141,21 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
           })
           setError('email', { message: 'E-mail já cadastrado'})          
         break
+
         case 500: 
-          toast({
-            status: 'error',
-            title: 'Ocorreu um erro...',            
-            description: 'Servidor indisponível. Tente novamente!',            
-            duration: 10000,
-            isClosable: true,
-            position: 'bottom'
+          await retryCreateCustomer.mutateAsync({ name, email, phone })
+          .catch(() => {
+            toast({
+              status: 'error',
+              title: 'Ocorreu um erro...',            
+              description: error.response.data.message ?? 'Ocorreu um erro desconhecido',            
+              duration: 10000,
+              isClosable: true,
+              position: 'bottom'
+            })
           })
         break
+        
         default: 
           toast({
             status: 'error',
@@ -154,8 +164,9 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
             duration: 10000,
             isClosable: true,
             position: 'bottom'
-          })
+          })          
       }
+
     }
     return
   }
