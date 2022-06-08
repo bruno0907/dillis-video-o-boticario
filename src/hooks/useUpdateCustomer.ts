@@ -6,7 +6,7 @@ import { CustomerProps } from "../types";
 export const useUpdateCustomer = () => useMutation(
   async ({ id, name, email, authorizeSendMail, authorizeDisplayVideo }: CustomerProps) => {    
     return await updateCustomer({ id, email, name, authorizeSendMail, authorizeDisplayVideo, })
-  }, {
+  }, {    
     onSuccess: () => queryClient.invalidateQueries(['customers[]'])
   }
 )

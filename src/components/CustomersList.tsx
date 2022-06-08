@@ -100,10 +100,12 @@ export const CustomersList = ({ customers, handleCustomerToEdit, handleOpenModal
         <Tbody>
           {!customers?.length ? (
             <Tr>
-              <HStack spacing={3} p="3">
-                <FiAlertTriangle />
-                <Text color="gray.400" display="flex">Nenhum visitante encontrado</Text>
-              </HStack>
+              <Td colSpan={5}>
+                <HStack spacing={3} p="3">
+                  <FiAlertTriangle />
+                  <Text color="gray.400" display="flex">Nenhum visitante encontrado</Text>
+                </HStack>
+              </Td>
             </Tr>
           ) : customers!.map(customer => (
             <Tr key={customer.id}>

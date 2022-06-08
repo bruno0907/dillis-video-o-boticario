@@ -57,7 +57,7 @@ export const Player = () => {
 
   }, [data])
 
-  if(isLoading || !playList.length) {
+  if(isLoading) {
     return (      
       <Center h="100vh">
         <Spinner size="lg" mr="4" />
@@ -108,16 +108,21 @@ export const Player = () => {
             leftIcon={<BiFullscreen />}
           >Tela cheia</Button>
         </HStack>
+
+        {!playList.length ? (
+          <Heading size="md" mt="24">Nenhum vídeo autorizado para a reprodução</Heading>
+        ) : (
+            <video
+              src={playList[currentVideoPlaying]}
+              muted
+              autoPlay      
+              ref={playerRef}                          
+              controls={true}
+              onPlay={fullScreen}
+              onEnded={playNext}
+            />
+        )}
         
-        <video
-          src={playList[currentVideoPlaying]}
-          muted
-          autoPlay      
-          ref={playerRef}                          
-          controls={true}
-          onPlay={fullScreen}
-          onEnded={playNext}
-        />
 
       </Flex>
     </>    

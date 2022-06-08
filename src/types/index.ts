@@ -27,9 +27,9 @@ export type CustomerResponseProps = {
   email: string;
   authorize_send_mail: boolean;
   authorize_display_video: boolean;
-  video_url?: string | undefined;
-  created_at?: Date | undefined;
-  updated_at?: Date | undefined;
+  video_url: string | undefined;
+  created_at: Date | undefined;
+  updated_at: Date | undefined;
 }
 
 export type VideosProps = {

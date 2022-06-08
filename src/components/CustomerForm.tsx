@@ -79,7 +79,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         await updateCustomer.mutateAsync({
           ...customerToEdit,
           name,
-          email: authorizeSendMail ? email: '',
+          email: authorizeSendMail ? email : '',
           authorizeSendMail,
           authorizeDisplayVideo
         })    
@@ -98,7 +98,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
 
       await createCustomer.mutateAsync({
         name,
-        email,
+        email: authorizeSendMail ? email : '',
         authorizeSendMail,
         authorizeDisplayVideo
       })
@@ -141,17 +141,14 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         break
 
         case 500: 
-          await retryCreateCustomer.mutateAsync({ name, email, authorizeSendMail, authorizeDisplayVideo })
-          .catch(() => {
-            toast({
-              status: 'error',
-              title: 'Ocorreu um erro...',            
-              description: error.response.data.message ?? 'Ocorreu um erro desconhecido',            
-              duration: 10000,
-              isClosable: true,
-              position: 'bottom'
-            })
-          })
+          toast({
+            status: 'error',
+            title: 'Ocorreu um erro...',            
+            description: error.response.data.message ?? 'Ocorreu um erro desconhecido',            
+            duration: 10000,
+            isClosable: true,
+            position: 'bottom'
+          })          
         break
         
         default: 
@@ -243,7 +240,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
         }
       </FormControl>
 
-      <VStack spacing={2}>
+      <VStack spacing={2} w="100%" align="flex-start">
         <Checkbox colorScheme="whatsapp" {...register('authorizeSendMail')}>
           {isAuthorizingSendMail 
             ? 'Estou autorizando me enviar o vídeo no e-mail' 
@@ -256,8 +253,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
               <FiMail fontSize="20"/>
             </InputLeftElement>
             <Input
-              id="email"
-              // type="email"
+              id="email"              
               placeholder="contato@email.com.br"
               autoComplete="none"
               isDisabled={isSubmitting}

@@ -25,7 +25,7 @@ export const startMirage = () => {
           return faker.name.findName()
         },
         email() {
-          return faker.internet.email().toLocaleLowerCase()
+          return faker.internet.email().toLocaleLowerCase() || null
         },
         authorizeSendMail(i) {
           const isAuthorizing = [true, false]
