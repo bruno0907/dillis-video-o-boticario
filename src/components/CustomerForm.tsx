@@ -24,7 +24,6 @@ import { CustomerProps, NewCustomerProps } from "../types";
 import { useCreateCustomer } from "../hooks/useCreateCustomer";
 import { useUpdateCustomer } from "../hooks/useUpdateCustomer";
 import { queryClient } from "../services/queryClient";
-import { useRetryCreateCustomer } from "../hooks/useRetryCreateCustomer";
 
 const customerSchema = yup.object().shape({
   name: yup.string().required('O nome é obrigatório')
@@ -51,8 +50,7 @@ export const CustomerForm = ({ customerToEdit, handleCustomerToEdit, handleClose
   const toast = useToast()
 
   const createCustomer = useCreateCustomer()
-  const updateCustomer = useUpdateCustomer()
-  const retryCreateCustomer = useRetryCreateCustomer()  
+  const updateCustomer = useUpdateCustomer()  
 
   const { 
     register, 
